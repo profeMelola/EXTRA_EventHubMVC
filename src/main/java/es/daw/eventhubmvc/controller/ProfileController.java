@@ -6,6 +6,7 @@ import es.daw.eventhubmvc.exception.EmailAlreadyExistsException;
 import es.daw.eventhubmvc.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.util.Locale;
 
 @Controller
 @RequestMapping("/profile")
@@ -24,6 +26,7 @@ import java.security.Principal;
 public class ProfileController {
 
     private final UserService userService;
+    private final MessageSource messageSource;
 
     @GetMapping("/edit-principal")
     public String editProfilePrincipal(
@@ -84,7 +87,8 @@ public class ProfileController {
             @AuthenticationPrincipal User user,
             @Valid @ModelAttribute("form") UserProfileUpdateRequest form,
             BindingResult bindingResult,
-            RedirectAttributes redirectAttributes
+            RedirectAttributes redirectAttributes,
+            Locale locale
     ){
         // --------------------------------
         // Validar que las pwd coincidan. Solo si vienen rellenas
@@ -108,14 +112,19 @@ public class ProfileController {
         try {
             userService.updateProfile(user.getId(), form);
         }catch (EmailAlreadyExistsException e){
-            //bindingResult.rejectValue("email","email.duplicate");
-            bindingResult.rejectValue("email","email.duplicate.form.email");
+            bindingResult.rejectValue("email","email.duplicate");
+            //bindingResult.rejectValue("email","email.duplicate.form.email");
             return "profile/edit";
         }
 
         // Si pasa por aquí todo ha ido OK
-        // PENDIENTE!!! puedo añadir un mensaje al atributo flash vía internacionalización????
-        redirectAttributes.addFlashAttribute("success", "Perfil actualizado correctamente");
+
+        // Sin internacionalización!!!!
+        //redirectAttributes.addFlashAttribute("success", "Perfil actualizado correctamente");
+
+        // Obtener el mensaje internacionalizado usando la clave 'profile.updated'
+        String successMessage = messageSource.getMessage("profile.updated", null, locale);
+        redirectAttributes.addFlashAttribute("success", successMessage);
 
         // Usar redirect attributes para mostrar el mensaje de perfil actualizado ok
 //        GET  /profile/edit  → mostrar formulario
