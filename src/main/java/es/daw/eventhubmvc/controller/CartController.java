@@ -87,7 +87,9 @@ public class CartController {
         // ---------------------------------------------
         int max = ticketType.category().getMaxPerPurchase(); // si es VIP da 4, si es STUDENT da 2
         // cuańtos tickets hay en el carrito con
-        int currentQty = cart.getQty(ticketType.code()); // cantidad que existe previamente en el carrito
+        //BUG
+        //int currentQty = cart.getQty(ticketType.code()); // cantidad que existe previamente en el carrito
+        int currentQty = cart.getQtyByCategory(ticketType.category());
         int qty = form.qty(); // cantidad que quiero comprar
         int resultingQty = qty + currentQty;
 
